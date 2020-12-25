@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wz_translation/wz_notes_details.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dart_json_mapper/dart_json_mapper.dart';
+import 'package:wz_translation/wz_translation_model.dart';
+
+
+const SerializationOptions DEFAULT_SERIALIZE_OPTIONS = SerializationOptions(caseStyle: CaseStyle.Snake);
 
 class wz_notes_page extends StatelessWidget {
 
@@ -21,16 +27,52 @@ class wz_notes_page extends StatelessWidget {
     iconItems.add(new Icon(Icons.ac_unit));
     subTitleItems.add('subTitle: keyboard');
 
-    // if(mounted)
-    //   setState(() {
-    //
-    //   });
-    // _refreshController.loadComplete();
   }
 
 
   @override
   Widget build(BuildContext context) {
+
+  //   final  String source = '''
+  // "lines" : [
+  //   {
+  //     "title": '动画',
+  //     "subjeck": '有效期限',
+  //     "isFavorites": 0,
+  //     "date": '2020年12月26',
+  //     "img":
+  //     "https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3397537705,1180362904&fm=26&gp=0.jpg"
+  //   },
+  //   {
+  //      "title": '动画',
+  //     "subjeck": '有效期限',
+  //     "isFavorites": 0,
+  //     "date": '2020年12月26',
+  //     "img":
+  //     "https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3397537705,1180362904&fm=26&gp=0.jpg"
+  //   },
+  //   {
+  //      "title": '动画',
+  //     "subjeck": '有效期限',
+  //     "isFavorites": 0,
+  //     "date": '2020年12月26',
+  //     "img":
+  //     "https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3397537705,1180362904&fm=26&gp=0.jpg"
+  //   },
+  //   {
+  //    "title": '动画',
+  //     "subjeck": '有效期限',
+  //     "isFavorites": 0,
+  //     "date": '2020年12月26',
+  //     "img":
+  //     "https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3397537705,1180362904&fm=26&gp=0.jpg"
+  //   }
+  // ]
+  // ''';
+  //
+  //   final TranslationList result = JsonMapper.deserialize<TranslationList>(source, DEFAULT_SERIALIZE_OPTIONS);
+  //
+  //   print(result);
 
     List<Widget> _list = new List();
     for (int i = 0; i < titleItems.length; i++) {
@@ -38,6 +80,8 @@ class wz_notes_page extends StatelessWidget {
     }
     // 分割线
     var divideTiles = ListTile.divideTiles(context: context, tiles: _list).toList();
+
+    // print(instance);
 
     return DefaultTabController(
       length: 2, // tab个数
@@ -94,7 +138,10 @@ class wz_notes_page extends StatelessWidget {
     return Container(
       child: Column(
         children: <Widget>[
-          Image.network(GridData[index]['img']),
+          Image(
+            image: CachedNetworkImageProvider(GridData[index]['img']),
+          ),
+          //Image.network(GridData[index]['img']),
           // SizedBox(height: 10),
           Text(
             GridData[index]['title'],
@@ -178,6 +225,9 @@ class wz_notes_page extends StatelessWidget {
     'subTitle: weekend', 'subTitle: web',
     'subTitle: accessible', 'subTitle: ac_unit',
   ];
+
+
+
 
   //动态列表数据：
   List GridData = [
