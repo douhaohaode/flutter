@@ -211,6 +211,10 @@ class _ItemState extends State<Item> {
 
     var wMargin = 8.0;
 
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
     return Container(
 
       // decoration: BoxDecoration(
@@ -225,18 +229,62 @@ class _ItemState extends State<Item> {
       //     color: Colors.white),
       child: Card(
 
+        color: Colors.white, // 背景色
+        shadowColor: Colors.lightBlue, // 阴影颜色
+        elevation: 5, // 阴影高度
+        borderOnForeground: true, // 是否在 child 前绘制 border，默认为 true
+        //margin: EdgeInsets.fromLTRB(0, 50, 0, 30), // 外边距
+        // 边框
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            color: Colors.black12,
+            width: 1,
+          ),
+        ),
+
         child: Column(
           children: <Widget>[
-            Container(
-                child:
-                CachedNetworkImage(
+            Stack(
+              /**
+               * Stack中第一个widget为底部的内容，第二个为盖在上面的widget。所以这里的圆形图片CircleAvatar是底部，
+               * 第二个Container为盖在上面的文字。那么分析2这里的alignment就是调整第二个widget位置的属性。
+               * Alignment将第一个widget的中心当作（0，0）坐标。所以这里的（0.0，0.9）就是如图的位置。
+               * */
+              alignment: const Alignment(0.0, 0.9),  //分析 2
+
+              children: <Widget>[
+                   CachedNetworkImage(
                     imageUrl: widget.model.envelopePic,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  //  placeholder: (context, url) => CircularProgressIndicator(),
+                  //  errorWidget: (context, url, error) => Icon(Icons.error),
                     fit: BoxFit.fill,
-                ),
-                  width: (Screen.width / 2 - 2 * wMargin),
-                  height: (Screen.width / 2 - 2 * wMargin - 15),
+                     width: width,
+                     height: (width / 2 - 2 * wMargin - 25),
+
+                  ),
+                     Text(
+                     widget.model.chapterName,
+                     style: new TextStyle(
+                    fontSize: 17.0,
+                    // fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                     ),
+                //    Container(
+                //      //decoration: new BoxDecoration(
+                //        //color: Colors.black45,
+                //      //),
+                //      child: new Text(
+                //        widget.model.chapterName,
+                //        style: new TextStyle(
+                //          fontSize: 17.0,
+                //         // fontWeight: FontWeight.bold,
+                //           color: Colors.green,
+                //     ),
+                //   ),
+                // ),
+              ],
                   ),
             Column(
                 children: <Widget>[
@@ -245,15 +293,15 @@ class _ItemState extends State<Item> {
                         children: <Widget>[
                           Expanded(
                             child:  Text(widget.model.superChapterName,
-                              style: TextStyle(fontSize: 15,
+                              style: TextStyle(fontSize: 13,
                                 color: Colors.grey,
                               ),
                               textAlign : TextAlign.left,
                             ),
                           ),
                         Container(
-                          width: 40,
-                          height: 25,
+                      //    width: 40,
+                          height: 35,
                           child: FavoriteButtonWidget(
                             isFavorite: widget.model.collect ?? false,
                             id : widget.model.id,
@@ -267,7 +315,7 @@ class _ItemState extends State<Item> {
                     child: Row(
                       children: <Widget>[
                         Text(widget.model.niceShareDate,
-                          style: TextStyle(fontSize: 15,),
+                          style: TextStyle(fontSize: 13,),
                           //textAlign : TextAlign.left,
                         ),
                       ],
