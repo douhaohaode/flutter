@@ -1,17 +1,31 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'dart:ui' as ui show window;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:wz_translation/Model/ResutlModel.dart';
 import 'package:wz_translation/Widget/FavoriteButtonWidget.dart';
 import 'wz_translation_model.dart';
 import 'package:wz_translation/Model/wz_translation_model.dart';
 import 'package:wz_translation/Http/ServiceImpl.dart';
+import 'package:wz_translation/Model/ResutlModel.dart';
+import 'package:wz_translation/Http/HttpUtils.dart';
+import 'package:wz_translation/Http/api.dart';
+import 'package:dio/dio.dart';
+import 'package:dart_json_mapper/dart_json_mapper.dart';
+import 'package:wz_translation/Model/ResultMapper.dart';
+
+import 'package:wz_translation/Model/testModel.dart';
+
+const SerializationOptions DEFAULT_SERIALIZE_OPTIONS = SerializationOptions(caseStyle: CaseStyle.Snake);
 
 
 class wz_translation_page extends StatelessWidget {
 
   static final String assetsImgIssue = 'images/issue.png';
   static final String assetsImgNotice = 'images/notice.png';
+
 
    final List <Widget> tarList = [Tab(text: "第一个",),Tab(text: "第二个", ),Tab( text: "第三个",)];
 
@@ -24,13 +38,16 @@ class wz_translation_page extends StatelessWidget {
         appBar: AppBar(
             title: Text("翻译"),
             leading: IconButton(
-              // padding: EdgeInsets.all(8),
+               padding: EdgeInsets.only(left: 20, right: 0 ,top: 0,bottom: 0),
+                iconSize: 40,
               icon: getImage(assetsImgNotice),
               onPressed: (){
                 print('issue');
               },
             ),
-            actions : <Widget> [ IconButton(
+            actions : <Widget> [IconButton(
+              padding: EdgeInsets.only(left: 0, right: 20 ,top: 0,bottom: 0),
+              iconSize: 40,
               icon: getImage(assetsImgIssue),
               onPressed: (){
                 print('notice');
@@ -53,16 +70,12 @@ class wz_translation_page extends StatelessWidget {
             ListView(
               children: <Widget>[
                 ListTile(title: Text("这是第1个 tab")),
-                ListTile(title: Text("这是第1个 tab")),
-                ListTile(title: Text("这是第1个 tab"))
               ],
             ),
             OnlyGridView(),
             ListView(
               children: <Widget>[
                 ListTile(title: Text("这是第2个 tab")),
-                ListTile(title: Text("这是第2个 tab")),
-                ListTile(title: Text("这是第2个 tab"))
               ],
             ),
           ],
@@ -102,7 +115,7 @@ class _OnlyGridViewState extends State<OnlyGridView> {
   //当前页面
   int curPageNum = 0;
 
-  List<ItemListDataData> contentList = <ItemListDataData>[];
+  List<itemModelVo> contentList = <itemModelVo>[];
 
   LoadMoreStatue curLoadMoreStatue = LoadMoreStatue.STATUE_IDEL;
 
@@ -119,7 +132,6 @@ class _OnlyGridViewState extends State<OnlyGridView> {
     reFreshData();
   }
 
-
   Widget buildCtn() {
     return GridView.builder(
       padding: EdgeInsets.only(left: wPadding, right: wPadding, top: wPadding, bottom: wPadding),
@@ -134,6 +146,7 @@ class _OnlyGridViewState extends State<OnlyGridView> {
       itemBuilder: (c, i) =>
           Item(
             model: contentList[i],
+            row: i,
           ),
       itemCount: contentList.length,
     );
@@ -154,9 +167,25 @@ class _OnlyGridViewState extends State<OnlyGridView> {
   }
   void reFreshData() async {
 
+    // Response responses = await HttpUtils.getInstance().get(API.getList(1),
+    //     onSuccess: (responses){
+    //       var json = jsonDecode(responses.toString());
+    //       final  ResutlModel models = JsonMapper.deserialize<ResutlModel>(json);
+    //       ResutlModelVo model =  resultToVo(models);
+    //     },
+    //     onFailure: (msg){
+    //     },
+    //     isNeedCache: true);
+
+    setState(() {
+      contentList.clear();
+      print(contentList);
+    });
+
     curPageNum =1 ;
-    ItemListEntity itemListByCid = await ServiceImpl.getInstance()
+    ResutlModelVo itemListByCid = await ServiceImpl.getInstance()
         .getItemListByCid(curPageNum, 0);
+
     if(mounted){
       setState(() {
         if (itemListByCid != null &&
@@ -167,13 +196,14 @@ class _OnlyGridViewState extends State<OnlyGridView> {
         }
       });
     }
+
     _refreshController.refreshCompleted();
   }
 
   void loadMoreData() async{
 
     curPageNum ++ ;
-    ItemListEntity itemListByCid = await ServiceImpl.getInstance()
+    ResutlModelVo itemListByCid = await ServiceImpl.getInstance()
         .getItemListByCid(curPageNum, 0);
     if(mounted){
       setState(() {
@@ -198,8 +228,9 @@ class _OnlyGridViewState extends State<OnlyGridView> {
 class Item extends StatefulWidget {
 
   final String title;
-  final ItemListDataData model;
-  Item({this.title,this.model});
+  final itemModelVo model;
+  final int  row;
+  Item({this.title,this.model,this.row});
 
   @override
   _ItemState createState() => _ItemState();
@@ -209,41 +240,27 @@ class _ItemState extends State<Item> {
   @override
   Widget build(BuildContext context) {
 
-    var wMargin = 8.0;
+    final wMargin = 8.0;
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
 
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-
-    return Container(
-
-      // decoration: BoxDecoration(
-      //     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-      //     boxShadow: [
-      //       //阴影
-      //       BoxShadow(
-      //           color: Colors.grey[300],
-      //           offset: Offset(2.0, 2.0),
-      //           blurRadius: 2.0)
-      //     ],
-      //     color: Colors.white),
-      child: Card(
-
+    return  Card(
+        clipBehavior: Clip.antiAlias,
         color: Colors.white, // 背景色
         shadowColor: Colors.lightBlue, // 阴影颜色
         elevation: 5, // 阴影高度
-        borderOnForeground: true, // 是否在 child 前绘制 border，默认为 true
-        //margin: EdgeInsets.fromLTRB(0, 50, 0, 30), // 外边距
-        // 边框
+        borderOnForeground: false, // 是否在 child 前绘制 border，默认为 true
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(
+          borderRadius: BorderRadius.circular(10), // 设置圆角
+          side: BorderSide(                        // 边框
             color: Colors.black12,
             width: 1,
           ),
         ),
 
         child: Column(
+
+
           children: <Widget>[
             Stack(
               /**
@@ -251,7 +268,7 @@ class _ItemState extends State<Item> {
                * 第二个Container为盖在上面的文字。那么分析2这里的alignment就是调整第二个widget位置的属性。
                * Alignment将第一个widget的中心当作（0，0）坐标。所以这里的（0.0，0.9）就是如图的位置。
                * */
-              alignment: const Alignment(0.0, 0.9),  //分析 2
+              alignment: const Alignment(0.0, 0.9),
 
               children: <Widget>[
                    CachedNetworkImage(
@@ -271,21 +288,8 @@ class _ItemState extends State<Item> {
                     color: Colors.green,
                   ),
                      ),
-                //    Container(
-                //      //decoration: new BoxDecoration(
-                //        //color: Colors.black45,
-                //      //),
-                //      child: new Text(
-                //        widget.model.chapterName,
-                //        style: new TextStyle(
-                //          fontSize: 17.0,
-                //         // fontWeight: FontWeight.bold,
-                //           color: Colors.green,
-                //     ),
-                //   ),
-                // ),
               ],
-                  ),
+            ),
             Column(
                 children: <Widget>[
                   Padding(
@@ -304,7 +308,13 @@ class _ItemState extends State<Item> {
                           height: 35,
                           child: FavoriteButtonWidget(
                             isFavorite: widget.model.collect ?? false,
-                            id : widget.model.id,
+                            id : widget.model.id,row: widget.row,
+
+                            onChanged: (e){
+                              widget.model.collect = e;
+                              print("==================================================");
+                            },
+
                           ),
                         ),
                         ],
@@ -314,7 +324,7 @@ class _ItemState extends State<Item> {
                   Padding(
                     child: Row(
                       children: <Widget>[
-                        Text(widget.model.niceShareDate,
+                        Text(widget.model.niceDate,
                           style: TextStyle(fontSize: 13,),
                           //textAlign : TextAlign.left,
                         ),
@@ -327,9 +337,7 @@ class _ItemState extends State<Item> {
            // SizedBox(height: 3),
           ],
         ),
-      ),
-     // height: 250.0,
-    );
+      );
   }
 
   @override

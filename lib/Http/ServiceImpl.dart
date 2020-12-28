@@ -4,6 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:wz_translation/Http/HttpUtils.dart';
 import 'package:wz_translation/Http/api.dart';
 import 'package:wz_translation/Model/wz_translation_model.dart';
+import 'package:wz_translation/Model/ResultMapper.dart';
+import 'package:wz_translation/Model/ResutlModel.dart';
+import 'package:dart_json_mapper/dart_json_mapper.dart';
+
 class ServiceImpl{
   static ServiceImpl _instance;
 
@@ -45,8 +49,13 @@ class ServiceImpl{
 
         },
         isNeedCache: true);
-    ItemListEntity itemListEntity = ItemListEntity().fromJson(jsonDecode(responses.toString()));
-    return itemListEntity;
+
+    var json = jsonDecode(responses.toString());
+    final  ResutlModel models = JsonMapper.deserialize<ResutlModel>(json);
+   // ResutlModelVo model =  resultToVo(models);
+    return resultToVo(models);
+   // ItemListEntity itemListEntity = ItemListEntity().fromJson(jsonDecode(responses.toString()));
+  //  return itemListEntity;
   }
 
 

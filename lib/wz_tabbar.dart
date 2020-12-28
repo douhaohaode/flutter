@@ -8,6 +8,7 @@ import 'package:wz_translation/wz_mine_page.dart';
 
 class wz_tabbar extends StatefulWidget {
 
+
   wz_tabbar({Key key}) : super(key: key);
 
   _wz_tabbar createState() => _wz_tabbar();
@@ -16,9 +17,9 @@ class wz_tabbar extends StatefulWidget {
 
 class _wz_tabbar extends State<wz_tabbar> {
 
-     int cureentIndex = 0;
+    int cureentIndex = 0;
 
-     List listTabs = [ wz_translation_page() , wz_notes_page() , wz_course_page() , wz_mine_page() ];
+    final  List listTabs = [wz_translation_page() , wz_notes_page() , wz_course_page() , wz_mine_page() ];
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +36,10 @@ class _wz_tabbar extends State<wz_tabbar> {
         type: BottomNavigationBarType.fixed,
         fixedColor: Colors.green,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.language_sharp),title :Text('翻译'), ),
-          BottomNavigationBarItem(icon: Icon(Icons.note_add_outlined), title: Text('笔记'),),
-          BottomNavigationBarItem(icon: Icon(Icons.leaderboard_outlined),title: Text('学习'),),
-          BottomNavigationBarItem(icon: Icon(Icons.person),title: Text('我的'),),
+          BottomNavigationBarItem(icon: Icon(Icons.language_sharp),label :'翻译', ),
+          BottomNavigationBarItem(icon: Icon(Icons.note_add_outlined), label: '笔记',),
+          BottomNavigationBarItem(icon: Icon(Icons.leaderboard_outlined),label: '学习',),
+          BottomNavigationBarItem(icon: Icon(Icons.person),label:'我的',),
         ],
       ),
     );
